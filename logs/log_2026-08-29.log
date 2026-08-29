@@ -6,3 +6,49 @@
 2026-08-29 21:30:51,560 - INFO - Received request for model : llama-3.3-70b-versatile
 2026-08-29 21:30:51,843 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
 2026-08-29 21:30:51,846 - ERROR - Some error ocuured during reponse generation
+2026-08-29 21:32:04,750 - INFO - Starting backend + frontend service...
+2026-08-29 21:32:33,582 - INFO - Received request for model : llama-3.3-70b-versatile
+2026-08-29 21:32:33,812 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2026-08-29 21:32:33,814 - ERROR - Some error ocuured during reponse generation
+2026-08-29 21:34:12,430 - INFO - Received request for model : llama-3.3-70b-versatile
+2026-08-29 21:34:12,554 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2026-08-29 21:34:12,554 - ERROR - Some error ocuured during reponse generation
+2026-08-29 21:41:17,406 - INFO - Starting backend + frontend service...
+2026-08-29 21:41:26,157 - INFO - Starting backend + frontend service...
+2026-08-29 21:42:04,268 - INFO - Starting backend + frontend service...
+2026-08-29 21:42:39,511 - INFO - Starting backend + frontend service...
+2026-08-29 21:44:22,582 - INFO - Starting backend + frontend service...
+2026-08-29 21:45:16,088 - INFO - Received request for model : openai/gpt-oss-120b
+2026-08-29 21:45:16,089 - WARNING - Invalid model name
+2026-08-29 21:45:25,518 - INFO - Received request for model : llama-3.1-8b-instant
+2026-08-29 21:45:25,518 - WARNING - Invalid model name
+2026-08-29 21:45:26,186 - INFO - Received request for model : llama-3.1-8b-instant
+2026-08-29 21:45:26,186 - WARNING - Invalid model name
+2026-08-29 21:48:24,349 - INFO - Starting backend + frontend service...
+2026-08-29 21:48:38,043 - INFO - Starting backend + frontend service...
+2026-08-29 21:49:53,688 - INFO - Frontend directory: /Users/madhavmanoj/Documents/LLMOPS_PRO/MULTI-AI-AGENT/app/frontend
+2026-08-29 21:49:53,688 - INFO - Frontend exists: True
+2026-08-29 21:49:53,688 - INFO - Index exists: True
+2026-08-29 21:49:53,689 - INFO - Starting backend service...
+2026-08-29 21:51:19,777 - INFO - Starting backend + frontend service...
+2026-08-29 21:55:35,483 - INFO - Frontend directory: /Users/madhavmanoj/Documents/LLMOPS_PRO/MULTI-AI-AGENT/app/frontend
+2026-08-29 21:55:35,483 - INFO - Frontend exists: True
+2026-08-29 21:55:35,483 - INFO - Index exists: True
+2026-08-29 21:55:35,484 - INFO - Starting backend service...
+2026-08-29 21:57:33,354 - INFO - Starting backend + frontend service...
+2026-08-29 22:02:27,414 - INFO - Starting MULTI-AI-AGENT...
+2026-08-29 22:02:27,414 - INFO - Frontend directory: /Users/madhavmanoj/Documents/LLMOPS_PRO/MULTI-AI-AGENT/app/frontend
+2026-08-29 22:02:27,415 - INFO - Server: http://127.0.0.1:9999
+2026-08-29 22:04:32,377 - INFO - Starting MULTI-AI-AGENT...
+2026-08-29 22:04:32,377 - INFO - Frontend directory: /Users/madhavmanoj/Documents/LLMOPS_PRO/MULTI-AI-AGENT/app/frontend
+2026-08-29 22:04:32,377 - INFO - Server: http://127.0.0.1:9999
+2026-08-29 22:04:56,681 - INFO - Received request | model=openai/gpt-oss-120b | search=False
+2026-08-29 22:05:04,059 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-29 22:05:04,076 - INFO - Successfully generated response using openai/gpt-oss-120b
+2026-08-29 22:05:45,409 - INFO - Received request | model=openai/gpt-oss-120b | search=False
+2026-08-29 22:05:48,629 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-29 22:05:48,632 - INFO - Successfully generated response using openai/gpt-oss-120b
+2026-08-29 22:06:05,678 - INFO - Received request | model=openai/gpt-oss-120b | search=True
+2026-08-29 22:06:07,695 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-29 22:06:17,518 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 200 OK"
+2026-08-29 22:06:17,522 - INFO - Successfully generated response using openai/gpt-oss-120b
