@@ -2,3 +2,7 @@
 2026-08-29 21:26:52,575 - INFO - Starting backend + frontend service...
 2026-08-29 21:27:20,610 - INFO - Received request for model : llama-3.3-70b-versatile
 2026-08-29 21:27:20,754 - ERROR - Some error ocuured during reponse generation
+2026-08-29 21:30:18,905 - INFO - Starting backend + frontend service...
+2026-08-29 21:30:51,560 - INFO - Received request for model : llama-3.3-70b-versatile
+2026-08-29 21:30:51,843 - INFO - HTTP Request: POST https://api.groq.com/openai/v1/chat/completions "HTTP/1.1 404 Not Found"
+2026-08-29 21:30:51,846 - ERROR - Some error ocuured during reponse generation
