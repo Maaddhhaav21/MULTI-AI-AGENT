@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>SIGNAL — Multi-Agent Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #0a0d12;
+    --panel: #12161d;
+    --panel-2: #171c25;
+    --border: #1f2530;
+    --border-soft: #1a1f29;
+    --text: #e8ebf0;
+    --text-muted: #7c8494;
+    --text-faint: #4d5566;
+    --groq: #ff6b2c;
+    --groq-dim: rgba(255,107,44,0.14);
+    --search: #33d6c0;
+    --search-dim: rgba(51,214,192,0.14);
+    --danger: #ff5c5c;
+    --danger-dim: rgba(255,92,92,0.12);
+    --radius: 10px;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(255,107,44,0.06), transparent 60%),
+      radial-gradient(1000px 500px at 100% 10%, rgba(51,214,192,0.05), transparent 55%),
+      var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    min-height:100vh;
+  }
+
+  ::selection{ background: var(--groq-dim); color: var(--text); }
+
+  .shell{
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 28px 24px 60px;
+  }
+
+  /* ---------- Header ---------- */
+  .topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding-bottom: 22px;
+    border-bottom: 1px solid var(--border-soft);
+    margin-bottom: 26px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+  }
+  .brand-mark{
+    width:34px; height:34px;
+    border-radius:8px;
+    background: linear-gradient(145deg, var(--groq), #ff9457);
+    display:flex; align-items:center; justify-content:center;
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06), 0 6px 18px -6px rgba(255,107,44,0.55);
+    flex-shrink:0;
+  }
+  .brand-mark svg{ width:18px; height:18px; }
+  .brand-text h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 19px;
+    font-weight:700;
+    letter-spacing: 0.5px;
+    margin:0;
+  }
+  .brand-text p{
+    margin:2px 0 0;
+    font-size:12px;
+    color: var(--text-muted);
+    letter-spacing:0.2px;
+  }
+  .conn-status{
+    display:flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono', monospace;
+    font-size:11.5px;
+    color: var(--text-muted);
+    padding:7px 12px;
+    border:1px solid var(--border);
+    border-radius:20px;
+    background: var(--panel);
+  }
+  .dot{
+    width:7px; height:7px; border-radius:50%;
+    background: var(--text-faint);
+    transition: all .25s ease;
+  }
+  .dot.live{ background: var(--search); box-shadow: 0 0 0 3px var(--search-dim); }
+  .dot.busy{ background: var(--groq); box-shadow: 0 0 0 3px var(--groq-dim); animation: pulse 1s infinite; }
+  .dot.err{ background: var(--danger); box-shadow: 0 0 0 3px var(--danger-dim); }
+  @keyframes pulse{ 0%,100%{ opacity:1; } 50%{ opacity:.35; } }
+
+  /* ---------- Layout ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns: 300px 1fr;
+    gap: 20px;
+    align-items:start;
+  }
+  @media (max-width: 880px){
+    .grid{ grid-template-columns: 1fr; }
+  }
+
+  .panel{
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+  }
+
+  .panel-title{
+    font-family:'Space Grotesk', sans-serif;
+    font-size: 11px;
+    font-weight:600;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0 0 16px;
+    display:flex; align-items:center; gap:8px;
+  }
+  .panel-title::before{
+    content:"";
+    width:3px; height:12px;
+    background: var(--groq);
+    border-radius:2px;
+    display:inline-block;
+  }
+
+  label{
+    display:block;
+    font-size: 12.5px;
+    font-weight:500;
+    color: var(--text-muted);
+    margin: 0 0 7px;
+  }
+  .field{ margin-bottom: 18px; }
+  .field:last-child{ margin-bottom:0; }
+
+  textarea, select{
+    width:100%;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-family:'Inter', sans-serif;
+    font-size: 13.5px;
+    resize: vertical;
+    transition: border-color .15s ease, box-shadow .15s ease;
+  }
+  textarea:focus, select:focus{
+    outline: none;
+    border-color: rgba(255,107,44,0.55);
+    box-shadow: 0 0 0 3px var(--groq-dim);
+  }
+  textarea#persona{ height: 78px; }
+
+  select{
+    appearance:none;
+    -webkit-appearance:none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%237c8494'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    padding-right: 30px;
+    cursor:pointer;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12.5px;
+  }
+
+  .toggle-row{
+    display:flex; align-items:center; justify-content:space-between;
+    background: var(--panel-2);
+    border:1px solid var(--border);
+    border-radius:8px;
+    padding: 11px 13px;
+  }
+  .toggle-row .lbl{ display:flex; flex-direction:column; gap:2px; }
+  .toggle-row .lbl span:first-child{ font-size:13px; color:var(--text); font-weight:500; }
+  .toggle-row .lbl span:last-child{ font-size:11px; color:var(--text-faint); }
+
+  .switch{
+    position:relative; width:38px; height:21px; flex-shrink:0;
+  }
+  .switch input{ opacity:0; width:0; height:0; }
+  .slider{
+    position:absolute; cursor:pointer; inset:0;
+    background: #262c38;
+    border-radius: 20px;
+    transition: .2s;
+    border: 1px solid var(--border);
+  }
+  .slider::before{
+    content:"";
+    position:absolute; width:15px; height:15px;
+    left:2px; top:2px;
+    background: var(--text-muted);
+    border-radius:50%;
+    transition: .2s;
+  }
+  .switch input:checked + .slider{ background: var(--search-dim); border-color: rgba(51,214,192,0.5); }
+  .switch input:checked + .slider::before{ transform: translateX(17px); background: var(--search); }
+
+  /* ---------- Pipeline ---------- */
+  .pipeline{
+    display:flex;
+    align-items:center;
+    gap: 0;
+    margin-bottom: 18px;
+    padding: 14px 16px;
+    background: var(--panel);
+    border:1px solid var(--border);
+    border-radius: var(--radius);
+    overflow-x:auto;
+  }
+  .stage{
+    display:flex; align-items:center; gap:9px;
+    flex-shrink:0;
+  }
+  .stage .num{
+    width:22px; height:22px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background: var(--panel-2);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    color: var(--text-faint);
+    transition: all .25s ease;
+    flex-shrink:0;
+  }
+  .stage .txt{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 11.5px;
+    color: var(--text-faint);
+    white-space:nowrap;
+    transition: color .25s ease;
+  }
+  .stage.active .num{ border-color: var(--groq); background: var(--groq-dim); color: var(--groq); animation: pulse 1s infinite; }
+  .stage.active .txt{ color: var(--text); }
+  .stage.done .num{ border-color: var(--search); background: var(--search-dim); color: var(--search); }
+  .stage.done .txt{ color: var(--text-muted); }
+  .connector{
+    width: 26px; height:1px;
+    background: var(--border);
+    margin: 0 8px;
+    flex-shrink:0;
+  }
+  .connector.done{ background: var(--search); opacity:0.5; }
+
+  /* ---------- Main column ---------- */
+  .main-col{ display:flex; flex-direction:column; gap:18px; }
+
+  .query-box textarea#query{ height: 128px; font-size:14px; }
+
+  .send-row{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-top: 14px;
+  }
+  .hint{
+    font-size: 11.5px;
+    color: var(--text-faint);
+    font-family:'JetBrains Mono', monospace;
+  }
+  button#send{
+    background: linear-gradient(135deg, var(--groq), #ff8547);
+    color: #120a05;
+    border:none;
+    font-family:'Space Grotesk', sans-serif;
+    font-weight:700;
+    font-size: 13.5px;
+    letter-spacing:0.3px;
+    padding: 11px 22px;
+    border-radius: 8px;
+    cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+    transition: transform .12s ease, box-shadow .12s ease, opacity .15s ease;
+    box-shadow: 0 6px 20px -6px rgba(255,107,44,0.55);
+  }
+  button#send:hover:not(:disabled){ transform: translateY(-1px); box-shadow: 0 8px 24px -6px rgba(255,107,44,0.7); }
+  button#send:active:not(:disabled){ transform: translateY(0); }
+  button#send:disabled{ opacity:0.55; cursor:not-allowed; }
+  button#send svg{ width:14px; height:14px; }
+
+  .spinner{
+    width:14px; height:14px;
+    border-radius:50%;
+    border:2px solid rgba(18,10,5,0.35);
+    border-top-color:#120a05;
+    animation: spin .7s linear infinite;
+    display:none;
+  }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  /* ---------- Response ---------- */
+  .response-panel{ min-height: 160px; }
+  .response-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom: 14px;
+  }
+  .response-tags{ display:flex; gap:8px; }
+  .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:10.5px;
+    padding: 4px 9px;
+    border-radius: 20px;
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    background: var(--panel-2);
+  }
+  .tag.groq{ color: var(--groq); border-color: rgba(255,107,44,0.35); }
+  .tag.search{ color: var(--search); border-color: rgba(51,214,192,0.35); }
+
+  .copy-btn{
+    background:none; border:1px solid var(--border);
+    color: var(--text-muted);
+    font-size:11px;
+    padding: 5px 10px;
+    border-radius:6px;
+    cursor:pointer;
+    font-family:'Inter', sans-serif;
+    transition: all .15s ease;
+  }
+  .copy-btn:hover{ color: var(--text); border-color: var(--text-faint); }
+
+  #response-body{
+    font-size: 14.5px;
+    line-height: 1.7;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-wrap: break-word;
+  }
+  #response-body code{
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family:'JetBrains Mono', monospace;
+    font-size: 12.5px;
+    color: var(--search);
+  }
+  #response-body strong{ color: var(--text); font-weight:600; }
+
+  .empty-state{
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center;
+    padding: 34px 20px;
+    color: var(--text-faint);
+  }
+  .empty-state svg{ width:34px; height:34px; margin-bottom:12px; opacity:0.5; }
+  .empty-state p{ margin:0; font-size:13px; }
+  .empty-state span{ font-family:'JetBrains Mono', monospace; font-size:11px; color: var(--text-faint); margin-top:4px; }
+
+  .error-box{
+    display:flex; gap:10px; align-items:flex-start;
+    background: var(--danger-dim);
+    border: 1px solid rgba(255,92,92,0.35);
+    color: #ffb3b3;
+    padding: 13px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height:1.5;
+  }
+  .error-box svg{ width:16px; height:16px; flex-shrink:0; margin-top:1px; }
+
+  footer{
+    text-align:center;
+    margin-top: 30px;
+    font-size: 11px;
+    color: var(--text-faint);
+    font-family:'JetBrains Mono', monospace;
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 12h4l2-7 4 14 2-7h4" stroke="#120a05" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="brand-text">
+        <h1>SIGNAL</h1>
+        <p>Multi-agent console · Groq inference · Tavily search</p>
+      </div>
+    </div>
+    <div class="conn-status">
+      <span class="dot" id="conn-dot"></span>
+      <span id="conn-label">checking backend…</span>
+    </div>
+  </div>
+
+  <div class="grid">
+
+    <!-- CONFIG PANEL -->
+    <div class="panel">
+      <p class="panel-title">Agent Setup</p>
+
+      <div class="field">
+        <label for="persona">Agent persona</label>
+        <textarea id="persona" placeholder="e.g. You are a precise, no-fluff research analyst..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="model">Model</label>
+        <select id="model"></select>
+      </div>
+
+      <div class="field" style="margin-bottom:0;">
+        <label style="margin-bottom:9px;">Tools</label>
+        <div class="toggle-row">
+          <div class="lbl">
+            <span>Web search</span>
+            <span>Route through Tavily</span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="allow-search">
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN COLUMN -->
+    <div class="main-col">
+
+      <div class="pipeline" id="pipeline">
+        <div class="stage" data-stage="0">
+          <div class="num">1</div><div class="txt">Prompt</div>
+        </div>
+        <div class="connector"></div>
+        <div class="stage" data-stage="1">
+          <div class="num">2</div><div class="txt">Routing</div>
+        </div>
+        <div class="connector"></div>
+        <div class="stage" data-stage="2">
+          <div class="num">3</div><div class="txt">Model</div>
+        </div>
+        <div class="connector"></div>
+        <div class="stage" data-stage="3">
+          <div class="num">4</div><div class="txt">Search</div>
+        </div>
+        <div class="connector"></div>
+        <div class="stage" data-stage="4">
+          <div class="num">5</div><div class="txt">Response</div>
+        </div>
+      </div>
+
+      <div class="panel query-box">
+        <p class="panel-title">Query</p>
+        <textarea id="query" placeholder="Ask your agent something…"></textarea>
+        <div class="send-row">
+          <span class="hint" id="query-hint">⌘ / Ctrl + Enter to send</span>
+          <button id="send">
+            <span class="spinner" id="spinner"></span>
+            <span id="send-label">Ask Agent</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="panel response-panel">
+        <div class="response-head">
+          <p class="panel-title" style="margin-bottom:0;">Response</p>
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div class="response-tags" id="response-tags" style="display:none;"></div>
+            <button class="copy-btn" id="copy-btn" style="display:none;">Copy</button>
+          </div>
+        </div>
+        <div id="response-area">
+          <div class="empty-state" id="empty-state">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 12h8M8 8h5M8 16h4" stroke-linecap="round"/><rect x="3" y="4" width="18" height="16" rx="3"/></svg>
+            <p>No response yet</p>
+            <span>Configure your agent and send a query</span>
+          </div>
+          <div id="response-body" style="display:none;"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <footer>SIGNAL · local console for your multi-agent backend</footer>
+</div>
+
+<script>
+  // ---- Configuration -----------------------------------------------
+  // Point this at your FastAPI backend. If you serve this file FROM
+  // the same FastAPI app (recommended, see notes below), you can set
+  // this to a relative path like "/chat" instead and skip CORS entirely.
+  const API_URL = "http://127.0.0.1:9999/chat";
+
+  // Mirror this list from your backend's settings.ALLOWED_MODEL_NAMES.
+  // (Kept static here since the browser can't import your Python settings.)
+  const ALLOWED_MODEL_NAMES = [
+    "llama-3.3-70b-versatile",
+    "llama-3.1-8b-instant",
+    "mixtral-8x7b-32768",
+    "gemma2-9b-it"
+  ];
+
+  const modelSelect = document.getElementById("model");
+  ALLOWED_MODEL_NAMES.forEach(m => {
+    const opt = document.createElement("option");
+    opt.value = m; opt.textContent = m;
+    modelSelect.appendChild(opt);
+  });
+
+  const connDot = document.getElementById("conn-dot");
+  const connLabel = document.getElementById("conn-label");
+
+  async function checkBackend(){
+    try{
+      // Lightweight probe — swap for a real health endpoint if you have one.
+      const res = await fetch(API_URL, { method: "OPTIONS" }).catch(() => null);
+      connDot.className = "dot live";
+      connLabel.textContent = "backend reachable";
+    }catch(e){
+      connDot.className = "dot err";
+      connLabel.textContent = "backend unreachable";
+    }
+  }
+  checkBackend();
+
+  const sendBtn = document.getElementById("send");
+  const sendLabel = document.getElementById("send-label");
+  const spinner = document.getElementById("spinner");
+  const queryBox = document.getElementById("query");
+  const emptyState = document.getElementById("empty-state");
+  const responseBody = document.getElementById("response-body");
+  const responseTags = document.getElementById("response-tags");
+  const copyBtn = document.getElementById("copy-btn");
+
+  const stages = document.querySelectorAll(".stage");
+  const connectors = document.querySelectorAll(".connector");
+
+  function resetPipeline(){
+    stages.forEach(s => s.classList.remove("active", "done"));
+    connectors.forEach(c => c.classList.remove("done"));
+  }
+
+  function setStage(i, searching){
+    stages.forEach((s, idx) => {
+      const stageIdx = parseInt(s.dataset.stage);
+      // skip the "search" stage visually if search is disabled
+      if (stageIdx === 3 && !searching){ s.style.opacity = 0.3; }
+      else { s.style.opacity = 1; }
+
+      if (stageIdx < i) { s.classList.add("done"); s.classList.remove("active"); }
+      else if (stageIdx === i) { s.classList.add("active"); s.classList.remove("done"); }
+      else { s.classList.remove("active", "done"); }
+    });
+    connectors.forEach((c, idx) => {
+      c.classList.toggle("done", idx < i);
+    });
+  }
+
+  function escapeHtml(str){
+    return str.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function renderMarkdownish(text){
+    let safe = escapeHtml(text);
+    safe = safe.replace(/`([^`]+)`/g, "<code>$1</code>");
+    safe = safe.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>");
+    return safe;
+  }
+
+  function showError(message){
+    emptyState.style.display = "none";
+    responseBody.style.display = "block";
+    responseTags.style.display = "none";
+    copyBtn.style.display = "none";
+    responseBody.innerHTML = `
+      <div class="error-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v5M12 16h.01" stroke-linecap="round"/></svg>
+        <span>${escapeHtml(message)}</span>
+      </div>`;
+  }
+
+  async function askAgent(){
+    const query = queryBox.value.trim();
+    if (!query) { queryBox.focus(); return; }
+
+    const model = modelSelect.value;
+    const persona = document.getElementById("persona").value;
+    const allowSearch = document.getElementById("allow-search").checked;
+
+    sendBtn.disabled = true;
+    sendLabel.textContent = "Working…";
+    spinner.style.display = "inline-block";
+    resetPipeline();
+    setStage(0, allowSearch);
+
+    const payload = {
+      model_name: model,
+      system_prompt: persona,
+      messages: [query],
+      allow_search: allowSearch
+    };
+
+    // Animate through the pipeline stages while the request is in flight.
+    let step = 1;
+    setStage(step, allowSearch);
+    const stageTimer = setInterval(() => {
+      const maxStep = allowSearch ? 3 : 2;
+      if (step < maxStep) {
+        step += 1;
+        setStage(step, allowSearch);
+      }
+    }, 550);
+
+    try{
+      const res = await fetch(API_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+
+      clearInterval(stageTimer);
+      setStage(4, allowSearch);
+      connDot.className = "dot live";
+      connLabel.textContent = "backend reachable";
+
+      if (!res.ok) {
+        throw new Error(`Backend responded with status ${res.status}`);
+      }
+
+      const data = await res.json();
+      const agentResponse = data.response || "";
+
+      emptyState.style.display = "none";
+      responseBody.style.display = "block";
+      responseBody.innerHTML = renderMarkdownish(agentResponse || "No content returned.");
+
+      responseTags.style.display = "flex";
+      responseTags.innerHTML = `
+        <span class="tag groq">${escapeHtml(model)}</span>
+        ${allowSearch ? '<span class="tag search">web search</span>' : ''}
+      `;
+      copyBtn.style.display = "inline-block";
+
+    }catch(err){
+      clearInterval(stageTimer);
+      resetPipeline();
+      connDot.className = "dot err";
+      connLabel.textContent = "backend unreachable";
+      showError(
+        err.message.includes("Failed to fetch")
+          ? "Could not reach the backend. Confirm it's running at " + API_URL + " and that CORS is enabled if this page is served from a different origin."
+          : "Failed to communicate with backend: " + err.message
+      );
+    }finally{
+      sendBtn.disabled = false;
+      sendLabel.textContent = "Ask Agent";
+      spinner.style.display = "none";
+    }
+  }
+
+  sendBtn.addEventListener("click", askAgent);
+  queryBox.addEventListener("keydown", (e) => {
+    if ((e.metaKey || e.ctrlKey) && e.key === "Enter") askAgent();
+  });
+
+  copyBtn.addEventListener("click", () => {
+    navigator.clipboard.writeText(responseBody.innerText).then(() => {
+      copyBtn.textContent = "Copied";
+      setTimeout(() => copyBtn.textContent = "Copy", 1200);
+    });
+  });
+</script>
+
+</body>
+</html>
